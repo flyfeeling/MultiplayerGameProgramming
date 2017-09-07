@@ -33,7 +33,7 @@ int TCPSocket::Listen(int inBackLog)
 
 TCPSocketPtr TCPSocket::Accept(SocketAddress &inFromAddress)
 {
-	int length = inFromAddress.GetSize();
+	unsigned int length = inFromAddress.GetSize();
 	SOCKET newSocket = accept(mSocket, &inFromAddress.mSockAddr, &length);
 
 	if (newSocket != INVALID_SOCKET)

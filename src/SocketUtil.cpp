@@ -131,7 +131,10 @@ int SocketUtil::Select(const std::vector< TCPSocketPtr >* inReadSet,
 	fd_set *writePtr = FillSetFromVector(write, inWriteSet, nfds);
 	fd_set *exceptPtr = FillSetFromVector(except, inExceptSet, nfds);
 
-	int toRet = select(nfds + 1, readPtr, writePtr, exceptPtr, nullptr);
+	struct timeval timeout;
+	timeout.tv_sec = 0;
+	timeout.tv_usec = 0;
+	int toRet = select(nfds + 1, readPtr, writePtr, exceptPtr, &timeout);
 
 	if (toRet > 0)
 	{

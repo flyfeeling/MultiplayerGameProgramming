@@ -9,6 +9,7 @@
 	#include "Ws2tcpip.h"
 	typedef int socklen_t;
 	//typedef char* receiveBufer_t;
+	#define s_addr S_un.S_addr
 #else
 	#include <sys/socket.h>
 	#include <netinet/in.h>
@@ -26,7 +27,9 @@
 	const int SOCKET_ERROR = -1;
 #endif
 
+#include <cstdarg>
 #include <cstdint>
+#include <cstring>
 #include <memory>
 #include <vector>
 #include <string>
