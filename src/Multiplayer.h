@@ -25,8 +25,12 @@
 	const int WSAECONNRESET = ECONNRESET;
 	const int WSAEWOULDBLOCK = EAGAIN;
 	const int SOCKET_ERROR = -1;
+
+	extern const char** __argv;
+	extern int __argc;
 #endif
 
+#include <cstdlib>
 #include <cstdarg>
 #include <cstdint>
 #include <cstring>
@@ -34,6 +38,7 @@
 #include <vector>
 #include <string>
 #include <list>
+#include <set>
 #include <cassert>
 
 #include "StringUtils.h"

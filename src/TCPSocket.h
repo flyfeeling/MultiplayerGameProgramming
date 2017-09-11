@@ -18,6 +18,9 @@ public:
 	int Send(const void *inData, int inLen);
 	int Receive(void *inBuffer, int inLen);
 
+	int SetNonBlockingMode(bool inShouldBeNonBlocking);
+	int SetReuseAddress(bool inShouldReuseAddress);
+
 private:
 
 	friend class SocketUtil;

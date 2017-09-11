@@ -72,3 +72,14 @@ int UDPSocket::SetNonBlockingMode(bool inShouldBeNonBlocking)
 		return NO_ERROR;
 	}
 }
+
+int UDPSocket::SetReuseAddress(bool inShouldReuseAddress)
+{
+	int enable = (int)inShouldReuseAddress;
+	int result = setsockopt(mSocket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int));
+	if (result == SOCKET_ERROR) {
+		SocketUtil::ReportError("UDPSocket::SetReuseAddress");
+		return SocketUtil::GetLastError();
+	}
+	return NO_ERROR;
+}

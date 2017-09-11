@@ -1,8 +1,8 @@
 #include "Multiplayer.h"
 
 #if !_WIN32
-extern const char** __argv;
-extern int __argc;
+const char** __argv;
+int __argc;
 void OutputDebugString(const char* inString)
 {
 	printf("%s", inString);
