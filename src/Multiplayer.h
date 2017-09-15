@@ -36,6 +36,7 @@
 #include <list>
 #include <cassert>
 
+#include "ByteSwap.h"
 #include "StringUtils.h"
 #include "SocketAddress.h"
 #include "SocketAddressFactory.h"

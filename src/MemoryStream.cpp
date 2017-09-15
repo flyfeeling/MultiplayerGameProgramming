@@ -23,3 +23,15 @@ void OutputMemoryStream::ReallocBuffer(uint32_t inNewLength)
 	// TODO: handle realloc failure
 	mCapacity = inNewLength;
 }
+
+void InputMemoryStream::Read(void *outData, size_t inByteCount)
+{
+	uint32_t resultHead = mHead + static_cast<uint32_t>(inByteCount);
+	if (resultHead > mCapacity)
+	{
+		// TODO: handle error, no data to read
+	}
+
+	std::memcpy(outData, mBuffer + mHead, inByteCount);
+	mHead = resultHead;
+}
