@@ -12,6 +12,7 @@ public:
 	int ReceiveFrom(void *inBuffer, int inLen, SocketAddress &outFrom);
 
 	int SetNonBlockingMode(bool inShouldBeNonBlocking);
+	int SetReuseAddress(bool inShouldReuseAddress);
 
 private:
 
