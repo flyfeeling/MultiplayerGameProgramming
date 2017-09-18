@@ -5,25 +5,7 @@ class SocketAddress
 {
 public:
 
-	SocketAddress(uint16_t inPort)
-	{
-		GetAsSockAddrIn()->sin_family = AF_INET;
-		GetAsSockAddrIn()->sin_addr.s_addr = INADDR_ANY;
-		GetAsSockAddrIn()->sin_port = inPort;
-	}
-
-	SocketAddress(uint32_t inAddress, uint16_t inPort)
-	{
-		GetAsSockAddrIn()->sin_family = AF_INET;
-		GetAsSockAddrIn()->sin_addr.s_addr = htonl(inAddress);
-		GetAsSockAddrIn()->sin_port = htons(inPort);
-	}
-	
-	SocketAddress(const sockaddr &inSockAddr)
-	{
-		memcpy(&mSockAddr, &inSockAddr, sizeof(sockaddr));
-	}
-
+	/** Default constructor. */
 	SocketAddress()
 	{
 		GetAsSockAddrIn()->sin_family = AF_INET;
@@ -31,8 +13,36 @@ public:
 		GetAsSockAddrIn()->sin_port = 0;
 	}
 
+	/** Parameterized constructor using a port. */
+	SocketAddress(uint16_t inPort)
+	{
+		GetAsSockAddrIn()->sin_family = AF_INET;
+		GetAsSockAddrIn()->sin_addr.s_addr = INADDR_ANY;
+		GetAsSockAddrIn()->sin_port = inPort;
+	}
+
+	/** Parameterized constructor using an IP address and a port. */
+	SocketAddress(uint32_t inAddress, uint16_t inPort)
+	{
+		GetAsSockAddrIn()->sin_family = AF_INET;
+		GetAsSockAddrIn()->sin_addr.s_addr = htonl(inAddress);
+		GetAsSockAddrIn()->sin_port = htons(inPort);
+	}
+
+	/** Parameterized constructor using an IP addreass and a port. */
+	SocketAddress(const std::string &inAddresAndPort);
+	
+	/** Copy constructor. */
+	SocketAddress(const sockaddr &inSockAddr)
+	{
+		memcpy(&mSockAddr, &inSockAddr, sizeof(sockaddr));
+	}
+
 	size_t GetSize() const { return sizeof(sockaddr); }
 
+	/**
+	 * Tells whether or not two addresses are the same.
+	 */
 	bool operator==(const SocketAddress &s) const
 	{
 		const auto *sa1 = GetAsSockAddrIn();
@@ -43,6 +53,10 @@ public:
 			sa1->sin_port == sa2->sin_port;
 	}
 
+	/**
+	 * Tells if the address at the lhs is lower than
+	 * the one at the rhs of the < operator.
+	 */
 	bool operator<(const SocketAddress &s) const
 	{
 		const auto *sa1 = GetAsSockAddrIn();
@@ -54,16 +68,19 @@ public:
 
 private:
 
+	// TCPSocket and UDPSockets can access the internals of this class
 	friend class TCPSocket;
 	friend class UDPSocket;
 
-	sockaddr mSockAddr;
+	sockaddr mSockAddr; /**< The struct containing the socket address. */
 
+	/** It returns the concrete struct sockaddr_in. */
 	sockaddr_in* GetAsSockAddrIn()
 	{
 		return reinterpret_cast<sockaddr_in*>(&mSockAddr);
 	}
 
+	/** It returns the concrete struct sockaddr_in (const version). */
 	const sockaddr_in* GetAsSockAddrIn() const
 	{
 		return reinterpret_cast<const sockaddr_in*>(&mSockAddr);

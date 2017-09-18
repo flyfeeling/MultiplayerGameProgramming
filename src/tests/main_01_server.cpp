@@ -13,8 +13,8 @@ void server()
 		SocketUtil::ReportError("Could not set socket option SO_REUSEADDR");
 	}
 
-	SocketAddressPtr bindAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-	res = serverSocket->Bind(*bindAddress);
+	SocketAddress bindAddress("127.0.0.1:8080");
+	res = serverSocket->Bind(bindAddress);
 	if (res != NO_ERROR) { return; }
 
 	res = serverSocket->Listen();

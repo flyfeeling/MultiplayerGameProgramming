@@ -18,8 +18,8 @@ void server(const char *serverPortStr)
 	if (res != NO_ERROR) { return; }
 
 	std::string serverAddress = std::string("127.0.0.1:") + serverPortStr;
-	SocketAddressPtr selfAddress = SocketAddressFactory::CreateIPv4FromString(serverAddress.c_str());
-	res = serverSocket->Bind(*selfAddress);
+	SocketAddress selfAddress(serverAddress.c_str());
+	res = serverSocket->Bind(selfAddress);
 	if (res != NO_ERROR) { return; }
 
 	// A client address
@@ -77,16 +77,16 @@ void client(const char *selfAddressStr, const char *serverAddressStr)
 	auto res = clientSocket->SetReuseAddress(true);
 	if (res != NO_ERROR) { return; }
 
-	SocketAddressPtr selfAddress = SocketAddressFactory::CreateIPv4FromString(selfAddressStr);
-	res = clientSocket->Bind(*selfAddress);
+	SocketAddress selfAddress(selfAddressStr);
+	res = clientSocket->Bind(selfAddress);
 	if (res != NO_ERROR) { return; }
 
 	// Create the server address
 	SocketAddress fromAddress;
-	SocketAddressPtr serverAddress = SocketAddressFactory::CreateIPv4FromString(serverAddressStr);
+	SocketAddress serverAddress(serverAddressStr);
 
 	// Send the connect command
-	auto sentBytes = clientSocket->SendTo(CMD_CONNECT, strlen(CMD_CONNECT)+1, *serverAddress);
+	auto sentBytes = clientSocket->SendTo(CMD_CONNECT, strlen(CMD_CONNECT)+1, serverAddress);
 
 	char inBuffer[MTU];
 	char outBuffer[MTU];
@@ -112,7 +112,7 @@ void client(const char *selfAddressStr, const char *serverAddressStr)
 			std::cin.getline(outBuffer,sizeof(outBuffer));
 			auto outLen = strlen(outBuffer);
 			if (outLen > 0) {
-				auto sentBytes = clientSocket->SendTo(outBuffer, outLen+1, *serverAddress);
+				auto sentBytes = clientSocket->SendTo(outBuffer, outLen+1, serverAddress);
 			}
 		}
 		else if (opt == "2")
@@ -126,7 +126,7 @@ void client(const char *selfAddressStr, const char *serverAddressStr)
 		else if (opt == "3")
 		{
 			// Send disconnect message
-			auto sentBytes = clientSocket->SendTo(CMD_DISCONNECT, strlen(CMD_DISCONNECT)+1, *serverAddress);
+			auto sentBytes = clientSocket->SendTo(CMD_DISCONNECT, strlen(CMD_DISCONNECT)+1, serverAddress);
 			running = false;
 		}
 		else

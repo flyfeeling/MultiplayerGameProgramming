@@ -15,8 +15,8 @@ void client(const char *clientName)
 //	if (res != NO_ERROR) { return; }
 
 	// Connect to server
-	SocketAddressPtr serverAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-	auto res = clientSocket->Connect(*serverAddress);
+	SocketAddress serverAddress("127.0.0.1:8080");
+	auto res = clientSocket->Connect(serverAddress);
 	if (res != NO_ERROR) { return; }
 
 	std::vector<TCPSocketPtr> sockets;

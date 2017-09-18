@@ -14,13 +14,13 @@ void mainLoop(const char *selfAddressStr, const char *peerAddressStr)
 	auto res = clientSocket->SetReuseAddress(true);
 	if (res != NO_ERROR) { return; }
 
-	SocketAddressPtr selfAddress = SocketAddressFactory::CreateIPv4FromString(selfAddressStr);
-	res = clientSocket->Bind(*selfAddress);
+	SocketAddress selfAddress(selfAddressStr);
+	res = clientSocket->Bind(selfAddress);
 	if (res != NO_ERROR) { return; }
 
 	// Create the peer address
 	SocketAddress fromAddress;
-	SocketAddressPtr peerAddress = SocketAddressFactory::CreateIPv4FromString(peerAddressStr);
+	SocketAddress peerAddress(peerAddressStr);
 
 	char inBuffer[MTU];
 	char outBuffer[MTU];
@@ -45,7 +45,7 @@ void mainLoop(const char *selfAddressStr, const char *peerAddressStr)
 			std::cin.getline(outBuffer,sizeof(outBuffer));
 			auto outLen = strlen(outBuffer);
 			if (outLen > 0) {
-				auto sentBytes = clientSocket->SendTo(outBuffer, outLen+1, *peerAddress);
+				auto sentBytes = clientSocket->SendTo(outBuffer, outLen+1, peerAddress);
 			}
 		}
 		else if (strcmp(optionBuffer, "2") == 0)

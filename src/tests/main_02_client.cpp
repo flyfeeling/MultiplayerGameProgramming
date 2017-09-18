@@ -17,8 +17,8 @@ void client(const char *clientName)
 		SocketUtil::ReportError("Could not set socket option SO_REUSEADDR");
 	}
 
-	SocketAddressPtr bindAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8081");
-	res = clientSocket->Bind(*bindAddress);
+	SocketAddress bindAddress("127.0.0.1:8081");
+	res = clientSocket->Bind(bindAddress);
 	if (res != NO_ERROR) { return; }
 
 	SocketAddress fromAddress;
@@ -26,8 +26,8 @@ void client(const char *clientName)
 	char inBuffer[MTU];
 
 	// We first say hello to the server
-	SocketAddressPtr serverAddress = SocketAddressFactory::CreateIPv4FromString("127.0.0.1:8080");
-	auto sentBytes = clientSocket->SendTo(CLIENT_STRING.c_str(), CLIENT_STRING.size()+1, *serverAddress);
+	SocketAddress serverAddress("127.0.0.1:8080");
+	auto sentBytes = clientSocket->SendTo(CLIENT_STRING.c_str(), CLIENT_STRING.size()+1, serverAddress);
 
 	while (1)
 	{
