@@ -15,3 +15,9 @@ target_link_libraries(main_02_client Multiplayer)
 add_executable(main_02_server main_02_server.cpp)
 target_link_libraries(main_02_server Multiplayer)
 
+add_executable(main_03_udp_peer2peer_chat main_03_udp_peer2peer_chat.cpp)
+target_link_libraries(main_03_udp_peer2peer_chat Multiplayer)
+
+add_executable(main_04_udp_chat_room main_04_udp_chat_room.cpp)
+target_link_libraries(main_04_udp_chat_room Multiplayer)
+

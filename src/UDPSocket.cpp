@@ -27,6 +27,10 @@ int UDPSocket::SendTo(const void *inData, int inLen, const SocketAddress &inTo)
 	{
 		return byteSentCount;
 	}
+	else if (byteSentCount == EWOULDBLOCK)
+	{
+		return 0;
+	}
 	else
 	{
 		// return error as a negative number
@@ -42,6 +46,10 @@ int UDPSocket::ReceiveFrom(void *inBuffer, int inLen, SocketAddress &outFrom)
 	if (readByteCount >= 0)
 	{
 		return readByteCount;
+	}
+	else if (readByteCount == EWOULDBLOCK)
+	{
+		return 0;
 	}
 	else
 	{
