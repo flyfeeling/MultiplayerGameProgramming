@@ -9,7 +9,10 @@ enum class Endianness {
 constexpr Endianness STREAM_ENDIANNESS = Endianness::BigEndian;
 constexpr Endianness PLATFORM_ENDIANNESS = Endianness::LittleEndian;
 
-constexpr uint32_t DEFAULT_STREAM_SIZE = 32;
+// Default size set to the minimum MSS (MTU - IP and TCP header sizes)
+// Typical MTU over Ethernet is 1500 bytes
+// Minimum IP and TCP header sizes are 20 bytes each
+constexpr uint32_t DEFAULT_STREAM_SIZE = 1460;
 
 class OutputMemoryStream
 {
@@ -17,7 +20,7 @@ public:
 
 	// Constructor
 	OutputMemoryStream(uint32_t inSize = DEFAULT_STREAM_SIZE):
-		mBuffer(nullptr), mHead(0), mCapacity(0)
+		mBuffer(nullptr), mCapacity(0), mHead(0)
 	{ ReallocBuffer(inSize); }
 
 	// Destructor
@@ -26,7 +29,11 @@ public:
 
 	// Get pointer to the data in the stream
 	const char *GetBufferPtr() const { return mBuffer; }
-	uint32_t GetLength() const { return mHead; }
+	uint32_t GetCapacity() const { return mCapacity; }
+	uint32_t GetSize() const { return mHead; }
+
+	// Clear the stream state
+	void Clear() { mHead = 0; }
 
 	// Write method
 	void Write(const void *inData, size_t inByteCount);
@@ -78,8 +85,8 @@ private:
 	void ReallocBuffer(uint32_t inNewLength);
 
 	char *mBuffer;
-	uint32_t mHead;
 	uint32_t mCapacity;
+	uint32_t mHead;
 };
 
 class InputMemoryStream
@@ -95,9 +102,13 @@ public:
 	~InputMemoryStream()
 	{ std::free(mBuffer); }
 
-	// Returns the number of bytes not read yet
-	uint32_t GetRemainingDataSize() const
-	{ return mCapacity - mHead; }
+	// Get pointer to the data in the stream
+	char *GetBufferPtr() const { return mBuffer; }
+	uint32_t GetCapacity() const { return mCapacity; }
+	uint32_t GetSize() const { return mHead; }
+
+	// Clear the stream state
+	void Clear() { mHead = 0; }
 
 	// Read method
 	void Read(void *outData, size_t inByteCount);
@@ -117,8 +128,9 @@ public:
 		}
 		else
 		{
-			T swappedData = ByteSwap( outData );
-			Read( &swappedData, sizeof( outData ) );
+			T unswappedData;
+			Read( &unswappedData, sizeof( unswappedData ) );
+			outData = ByteSwap(unswappedData);
 		}
 	}
 
@@ -135,11 +147,22 @@ public:
 		}
 	}
 
+	// Read for strings
+	void Read( std::string& inString )
+	{
+		size_t elementCount;
+		Read( elementCount );
+		inString.resize(elementCount);
+		for (auto &character : inString) {
+			Read(character);
+		}
+	}
+
 private:
 
 	char *mBuffer;
-	uint32_t mHead;
 	uint32_t mCapacity;
+	uint32_t mHead;
 };
 
 #endif // MEMORY_STREAM_H

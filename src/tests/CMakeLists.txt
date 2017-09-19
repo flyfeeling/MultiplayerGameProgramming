@@ -21,3 +21,6 @@ target_link_libraries(main_03_udp_peer2peer_chat Multiplayer)
 add_executable(main_04_udp_chat_room main_04_udp_chat_room.cpp)
 target_link_libraries(main_04_udp_chat_room Multiplayer)
 
+add_executable(main_05_udp_chat_room_streams main_05_udp_chat_room_streams.cpp)
+target_link_libraries(main_05_udp_chat_room_streams Multiplayer)
+

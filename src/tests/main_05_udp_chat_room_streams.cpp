@@ -2,10 +2,12 @@
 #include <iostream>
 #include <string>
 
-const int MTU = 1300;
-
-#define CMD_CONNECT "cmd:connect"
-#define CMD_DISCONNECT "cmd:disconnect"
+enum MessageType {
+	MT_CLIENT_CONNECT,
+	MT_CLIENT_DISCONNECT,
+	MT_CLIENT_TEXT,
+	MT_CLIENT_LAST
+};
 
 void server(const char *serverPortStr)
 {
@@ -26,26 +28,27 @@ void server(const char *serverPortStr)
 	SocketAddress clientAddress;
 
 	// Buffers
-	char inBuffer[MTU];
-	std::string inString;
+	InputMemoryStream inputStream;
 
 	std::set<SocketAddress> clientAddresses;
 
 	while (1)
 	{
 		// Receive information
-		auto recvBytes = serverSocket->ReceiveFrom(inBuffer, MTU, clientAddress);
+		inputStream.Clear();
+		auto recvBytes = serverSocket->ReceiveFrom(inputStream.GetBufferPtr(), inputStream.GetCapacity(), clientAddress);
 
 		if (recvBytes > 0) {
 
-			inString = inBuffer;
-			std::cout << inString << std::endl;
+			int command;
+			inputStream.Read(command);
+			std::cout << inputStream.GetBufferPtr() << std::endl;
 
-			if (inString == CMD_CONNECT)
+			if (command == MT_CLIENT_CONNECT)
 			{
 				clientAddresses.insert(clientAddress);
 			}
-			else if (inString == CMD_DISCONNECT)
+			else if (command == MT_CLIENT_DISCONNECT)
 			{
 				clientAddresses.erase(clientAddress);
 			}
@@ -53,11 +56,10 @@ void server(const char *serverPortStr)
 			{
 				bool found = false; // to check new clients
 
+				// Forward the message
 				for (auto address : clientAddresses) {
 					if (!(address == clientAddress)) {
-						auto sentBytes = serverSocket->SendTo(inBuffer, recvBytes, address);
-					} else {
-						found = true;
+						auto sentBytes = serverSocket->SendTo(inputStream.GetBufferPtr(), recvBytes, address);
 					}
 				}
 
@@ -87,14 +89,20 @@ void client(const char *selfAddressStr, const char *serverAddressStr)
 	SocketAddress fromAddress;
 	SocketAddress serverAddress(serverAddressStr);
 
+	// Create input and output streams
+	InputMemoryStream inputStream;
+	OutputMemoryStream outputStream;
+
 	// Send the connect command
-	auto sentBytes = clientSocket->SendTo(CMD_CONNECT, strlen(CMD_CONNECT)+1, serverAddress);
+	outputStream.Write(MT_CLIENT_CONNECT);
+	auto sentBytes = clientSocket->SendTo(outputStream.GetBufferPtr(), outputStream.GetSize(), serverAddress);
 
-	char inBuffer[MTU];
-	char outBuffer[MTU];
 	std::string opt;
-
+	char textline[512];
 	bool running = true;
+	std::string clientName("Client");
+	std::string remoteClientName;
+	std::string remoteTextLine;
 
 	while (running)
 	{
@@ -111,27 +119,43 @@ void client(const char *selfAddressStr, const char *serverAddressStr)
 		{
 			// Send information
 			std::cout << "Type the message: " << std::flush;
-			std::cin.getline(outBuffer,sizeof(outBuffer));
-			auto outLen = strlen(outBuffer);
+			std::cin.getline(textline,sizeof(textline));
+			auto outLen = strlen(textline);
 			if (outLen > 0) {
-				auto sentBytes = clientSocket->SendTo(outBuffer, outLen+1, serverAddress);
+				outputStream.Clear();
+				outputStream.Write(MT_CLIENT_TEXT);
+				outputStream.Write(clientName);
+				outputStream.Write(std::string(textline));
+				auto sentBytes = clientSocket->SendTo(outputStream.GetBufferPtr(), outputStream.GetSize(), serverAddress);
 			}
 		}
 		else if (opt == "2")
 		{
 			// Receive information
-			auto recvBytes = clientSocket->ReceiveFrom(inBuffer, MTU, fromAddress);
+			inputStream.Clear();
+			auto recvBytes = clientSocket->ReceiveFrom(inputStream.GetBufferPtr(), inputStream.GetCapacity(), fromAddress);
+
 			std::cout << std::endl;
-			while (recvBytes > 0)
-			{
-				std::cout << "---> " << inBuffer <<std::endl;
-				recvBytes = clientSocket->ReceiveFrom(inBuffer, MTU, fromAddress);
+			while (recvBytes > 0) {
+				// Read the packet
+				int command;
+				std::string name, textline;
+				inputStream.Read(command);
+				inputStream.Read(remoteClientName);
+				inputStream.Read(remoteTextLine);
+				std::cout << remoteClientName << ": " << remoteTextLine <<std::endl;
+
+				// Receive information
+				inputStream.Clear();
+				recvBytes = clientSocket->ReceiveFrom(inputStream.GetBufferPtr(), inputStream.GetCapacity(), fromAddress);
 			}
 		}
 		else if (opt == "3")
 		{
 			// Send disconnect message
-			auto sentBytes = clientSocket->SendTo(CMD_DISCONNECT, strlen(CMD_DISCONNECT)+1, serverAddress);
+			outputStream.Clear();
+			outputStream.Write(MT_CLIENT_DISCONNECT);
+			auto sentBytes = clientSocket->SendTo(outputStream.GetBufferPtr(), outputStream.GetSize(), serverAddress);
 			running = false;
 		}
 		else

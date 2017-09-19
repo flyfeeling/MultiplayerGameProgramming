@@ -41,12 +41,12 @@
 #include <set>
 #include <cassert>
 
-#include "ByteSwap.h"
 #include "StringUtils.h"
 #include "SocketAddress.h"
 #include "UDPSocket.h"
 #include "TCPSocket.h"
 #include "SocketUtil.h"
+#include "ByteSwap.h"
 #include "MemoryStream.h"
 
 #endif // MULTIPLAYER_H

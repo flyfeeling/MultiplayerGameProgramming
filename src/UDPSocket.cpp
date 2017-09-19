@@ -27,15 +27,13 @@ int UDPSocket::SendTo(const void *inData, int inLen, const SocketAddress &inTo)
 	{
 		return byteSentCount;
 	}
-	else if (byteSentCount == EWOULDBLOCK)
-	{
-		return 0;
-	}
 	else
 	{
-		// return error as a negative number
-		SocketUtil::ReportError("UDPSocket::SendTo");
-		return -SocketUtil::GetLastError();
+		auto lastError = SocketUtil::GetLastError();
+		if (lastError != EWOULDBLOCK) {
+			SocketUtil::ReportError("UDPSocket::SendTo");
+		}
+		return -lastError;
 	}
 }
 
@@ -47,14 +45,13 @@ int UDPSocket::ReceiveFrom(void *inBuffer, int inLen, SocketAddress &outFrom)
 	{
 		return readByteCount;
 	}
-	else if (readByteCount == EWOULDBLOCK)
-	{
-		return 0;
-	}
 	else
 	{
-		SocketUtil::ReportError("UDPSocket::ReceiveFrom");
-		return -SocketUtil::GetLastError();
+		auto lastError = SocketUtil::GetLastError();
+		if (lastError != EWOULDBLOCK) {
+			SocketUtil::ReportError("UDPSocket::ReceiveFrom");
+		}
+		return -lastError;
 	}
 }
 

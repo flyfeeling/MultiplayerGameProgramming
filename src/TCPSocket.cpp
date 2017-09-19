@@ -63,8 +63,11 @@ int TCPSocket::Send(const void *inData, int inLen)
 	int bytesSentCount = send(mSocket, static_cast<const char*>(inData), inLen, 0);
 	if (bytesSentCount < 0)
 	{
-		SocketUtil::ReportError("TCPSocket::Send");
-		return -SocketUtil::GetLastError();
+		auto lastError = SocketUtil::GetLastError();
+		if (lastError != EWOULDBLOCK) {
+			SocketUtil::ReportError("TCPSocket::Send");
+		}
+		return -lastError;
 	}
 	return bytesSentCount;
 }
@@ -74,8 +77,11 @@ int TCPSocket::Receive(void *inBuffer, int inLen)
 	int bytesReceivedCount = recv(mSocket, static_cast<char*>(inBuffer), inLen, 0);
 	if (bytesReceivedCount < 0)
 	{
-		SocketUtil::ReportError("TCPSocket::Receive");
-		return -SocketUtil::GetLastError();
+		auto lastError = SocketUtil::GetLastError();
+		if (lastError != EWOULDBLOCK) {
+			SocketUtil::ReportError("TCPSocket::Receive");
+		}
+		return -lastError;
 	}
 	return bytesReceivedCount;
 }

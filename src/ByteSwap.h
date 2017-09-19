@@ -50,6 +50,15 @@ private:
 // Byte swapper
 template < typename T, size_t tSize> class ByteSwapper;
 
+// Byte swapper specialization for 1 byte (no swap)
+template < class T > class ByteSwapper<T, 1>
+{
+public:
+	T Swap(T inData) const {
+		return inData;
+	}
+};
+
 // Byte swapper specialization for 2 bytes
 template < class T > class ByteSwapper<T, 2>
 {
